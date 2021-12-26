@@ -195,7 +195,9 @@ breed_traits_wide <- pivot_wider(joined_data,
             names_from = Trait, 
             values_from = Trait_Score) %>%
   # join Image links
-  left_join(., joined_data %>% select(Breed, Image), on="Breed") %>% distinct()
+  left_join(., joined_data %>% select(Breed, Image), on="Breed") %>% 
+  select(!`2020 Rank`) %>%
+  distinct()
 
 write.csv(breed_traits_wide, "./data/breed_traits.csv", row.names=F)
 saveRDS(breed_traits_wide, "./data/breed_traits.rds")
