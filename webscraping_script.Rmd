@@ -1,0 +1,210 @@
+---
+title: "webscraping_dog_traits"
+author: "Kristen A, kkakey"
+date: "12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Script to webscrape information on dog breed traits and most popular dog breed rankings in 2020 from the American Kennel Club. 
+
+Last webscraped:
+- Dec. 23, 2021
+
+```{r}
+library(rvest)
+library(tidyverse)
+library(RSelenium)
+```
+
+Get rankings of most popular dog breeds in [2020](https://www.akc.org/expert-advice/dog-breeds/the-most-popular-dog-breeds-of-2020/)
+```{r}
+page <- read_html('https://www.akc.org/expert-advice/dog-breeds/the-most-popular-dog-breeds-of-2020/')
+
+breed_rank_2020 <- page %>%
+  html_nodes(xpath='//*[@id="main-content"]/div[1]/div[2]/div/div[1]/table') %>%
+  html_table(fill = TRUE) 
+
+breed_rank_2020 <- breed_rank_2020 %>%
+  as.data.frame() %>%
+  janitor::row_to_names(row_number=1)
+```
+
+Get links to webpages on each specific dog breed
+```{r}
+links <- page %>%
+  html_nodes(xpath='//*[@id="main-content"]/div[1]/div[2]/div/div[1]/table') %>%
+  html_nodes("tr") %>%
+  html_nodes("a") %>% html_attr("href")
+
+breed_rank_2020 <- cbind(breed_rank_2020, links)
+write.csv(breed_rank_2020, "./data/breed_rank_2020_2020.csv", row.names=F)
+```
+
+Webscrape trait information, image links, and weight of all dog breeds
+```{r}
+breed_traits <- data.frame(matrix(ncol = 5, nrow = 0))
+breed_img_full <- data.frame(matrix(ncol = 3, nrow = 0))
+
+fprof <- getFirefoxProfile(Sys.getenv("firefox_prof_path"), useBase=TRUE)
+
+for (num in seq_along(links)) {
+  
+  print(paste(num, breed_rank_2020[num,]$Breed))
+  
+  url <- links[num]
+  if (num==1) {
+    rD <- RSelenium::rsDriver(browser = "firefox", extraCapabilities = fprof, port = 4567L, verbose = T)
+    remDr <- rD[["client"]]
+  }
+  remDr$navigate(url)
+  Sys.sleep(10)
+  
+  html <- remDr$getPageSource()[[1]]
+  
+  ################
+  c <- 1
+  breed_table <- data.frame(matrix(ncol = 5, nrow = 0))
+  while (c <17) {
+    
+    if (c==7) {
+      # Coat Types
+      trait <- "Coat Type"
+      trait_range1 <- "-"
+      trait_range2 <- "-"
+      
+      trait_score <- read_html(html) %>%
+        html_nodes("div.breed-trait-group__trait-all") %>%
+        .[[7]] %>% html_nodes("div.breed-trait-score__choices") %>% .[[1]] %>% 
+        html_nodes("div.breed-trait-score__choice.breed-trait-score__choice--selected") %>%
+        html_text()
+    }
+    
+    else if (c==8) {
+      # Coat Length
+      trait <- "Coat Length"
+      trait_range1 <- "-"
+      trait_range2 <- "-"
+      
+      trait_score <- read_html(html) %>%
+        html_nodes("div.breed-trait-group__trait-all") %>%
+        .[[8]] %>% html_nodes("div.breed-trait-score__choices") %>% .[[1]] %>% 
+        html_nodes("div.breed-trait-score__choice.breed-trait-score__choice--selected") %>%
+        html_text()
+    }
+    
+    else {
+      # header for trait
+      trait <- read_html(html) %>% 
+        html_nodes("div.breed-trait-group__trait-all") %>%
+          .[[c]] %>% html_nodes("h4") %>% html_text()
+      
+      # text of ranges (label for each trait)
+      trait_range <- read_html(html) %>%
+        html_nodes("div.breed-trait-group__trait-all") %>%
+        .[[c]] %>% html_nodes("div.breed-trait-score__score-label") %>% 
+        html_nodes("span") %>% html_text()
+      
+      trait_range1 <- trait_range[1]
+      trait_range2 <- trait_range[2]
+      
+      # number on scale (1-5) of the trait
+      trait_score <- read_html(html) %>%
+        html_nodes("div.breed-trait-group__trait-all") %>%
+        .[[c]] %>% html_nodes("div.breed-trait-score__score-wrap") %>%
+        html_nodes("div.breed-trait-score__score-unit.breed-trait-score__score-unit--filled") %>% 
+        length()
+      
+    }
+    c <- c + 1
+    breed_table <- rbind(breed_table, c(breed_rank_2020[num,]$Breed, trait, 
+                                        trait_range1, trait_range2, trait_score))
+  }
+  colnames(breed_traits)  <- c("Breed", "Trait", "Trait_1", "Trait_5", "Trait_Score")
+  colnames(breed_table)  <- c("Breed", "Trait", "Trait_1", "Trait_5", "Trait_Score")
+  breed_traits <- rbind(breed_traits, breed_table)
+  ################
+  
+  ################
+  breed_img_table <- data.frame(matrix(ncol = 3, nrow = 0))
+  tryCatch(
+    expr = {
+          image_link <- read_html(html) %>% 
+            html_nodes("div.breed-page__standard__image") %>% .[[1]] %>%
+            html_nodes("img") %>%
+            html_attr("data-src")
+    },
+    error = function(e){ 
+        image_link <- read_html(html) %>% 
+            html_nodes("div.breed-page__hero__gallery__image-wrapper") %>% .[[1]] %>%
+            html_nodes("img") %>%
+            html_attr("data-src")
+    }
+  )
+  
+  # text on weight
+  text <- read_html(html) %>% 
+    html_nodes("div.flex.flex-col") %>%
+    html_nodes("p.f-16.my0.lh-solid.breed-page__hero__overview__subtitle")%>% html_text()
+    
+  weight <- text[grepl("pounds", text, fixed = TRUE)]
+
+  breed_img_table <- rbind(breed_img_table, c(breed_rank_2020[num,]$Breed , 
+                                              image_link, paste(weight,collapse = '; ')))
+  colnames(breed_img_full)  <- c("Breed", "Image", "Weight")
+  colnames(breed_img_table)  <- c("Breed", "Image", "Weight")
+  breed_img_full <- rbind(breed_img_full, breed_img_table)
+  ################
+  
+  Sys.sleep(runif(1, min = 3, max = 6))
+
+}
+
+# close webpage
+rD$server$stop()
+
+### save data
+# write.csv(breed_traits, "./data/breed_traits.csv", row.names=F)
+# write.csv(breed_img_full, "./data/breed_weight_image.csv", row.names=F)
+```
+
+
+*****************************************************************************
+
+Clean and export data
+```{r}
+# join webscraped data
+joined_data <- breed_traits %>%
+  left_join(., breed_rank_2020, on ="Breed") %>%
+  left_join(., breed_weight_image, on ="Breed")
+
+# pivot data wide
+breed_traits_wide <- pivot_wider(joined_data, 
+            id_cols = c(`2020 Rank`, Breed),
+            names_from = Trait, 
+            values_from = Trait_Score) %>%
+  # join Image links
+  left_join(., joined_data %>% select(Breed, Image), on="Breed") %>% distinct()
+
+write.csv(breed_traits, "./data/breed_traits.csv", row.names=F)
+saveRDS(breed_traits, "./data/breed_traits.rds")
+```
+
+```{r}
+# information on each trait and score ranges
+trait_description <- breed_traits %>%
+  select(Trait, Trait_1, Trait_5) %>%
+  distinct()
+
+write.csv(trait_description, "./data/trait_description.csv", row.names=F)
+saveRDS(trait_description, "./data/trait_description.rds")
+```
+
+```{r}
+write.csv(breed_rank_2020, "./data/breed_rank_2020.csv", row.names=F)
+saveRDS(breed_rank_2020, "./data/breed_rank_2020.rds")
+```
+
