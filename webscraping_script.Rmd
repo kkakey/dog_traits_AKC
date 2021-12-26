@@ -41,8 +41,9 @@ links <- page %>%
   html_nodes("a") %>% html_attr("href")
 
 breed_rank_2020 <- cbind(breed_rank_2020, links)
-write.csv(breed_rank_2020, "./data/breed_rank_2020_2020.csv", row.names=F)
+write.csv(breed_rank_2020, "./data/breed_rank_2020.csv", row.names=F)
 ```
+
 
 Webscrape trait information, image links, and weight of all dog breeds
 ```{r}
@@ -204,10 +205,18 @@ saveRDS(breed_traits_wide, "./data/breed_traits.rds")
 ```
 
 ```{r}
-# information on each trait and score ranges
+# detailed description of each trait
+Description <- read_html(html) %>% 
+  html_nodes("div.breed-trait-group__trait.breed-trait-group__padded.breed-trait-group__row-wrap") %>%
+  html_nodes("p") %>%
+  html_text()
+
+# name of each trait and score ranges
 trait_description <- breed_traits %>%
   select(Trait, Trait_1, Trait_5) %>%
   distinct()
+
+trait_description <- cbind(trait_description, Description)
 
 write.csv(trait_description, "./data/trait_description.csv", row.names=F)
 saveRDS(trait_description, "./data/trait_description.rds")
