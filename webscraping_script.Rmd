@@ -189,8 +189,8 @@ breed_traits_wide <- pivot_wider(joined_data,
   # join Image links
   left_join(., joined_data %>% select(Breed, Image), on="Breed") %>% distinct()
 
-write.csv(breed_traits, "./data/breed_traits.csv", row.names=F)
-saveRDS(breed_traits, "./data/breed_traits.rds")
+write.csv(breed_traits_wide, "./data/breed_traits.csv", row.names=F)
+saveRDS(breed_traits_wide, "./data/breed_traits.rds")
 ```
 
 ```{r}
