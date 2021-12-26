@@ -179,7 +179,15 @@ Clean and export data
 # join webscraped data
 joined_data <- breed_traits %>%
   left_join(., breed_rank_2020, on ="Breed") %>%
-  left_join(., breed_weight_image, on ="Breed")
+  left_join(., breed_img_full, on ="Breed")
+
+breed_traits_long <- joined_data %>%
+  select(Breed, Trait, Trait_Score)
+
+write.csv(breed_traits_long, "./data/breed_traits_long.csv", row.names=F)
+saveRDS(breed_traits_long, "./data/breed_traits_long.rds")
+
+#########################
 
 # pivot data wide
 breed_traits_wide <- pivot_wider(joined_data, 
