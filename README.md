@@ -6,10 +6,10 @@ Data in this repository comes from the [American Kennel Club](https://www.akc.or
 
 ## The Datasets
 
-- **breed_traits_long** - trait information on each dog breed and scores for each trait (long format)
-- **breed_traits** - trait information on each dog breed and scores for each trait (wide format)
-- **trait_description** - long descriptions of each trait and values corresponding to `Trait_Score`
-- **breed_rank_2020** - popularity of dog breeds by AKC registration statistics in 2020
+- `breed_traits_long` - trait information on each dog breed and scores for each trait (long format)
+- `breed_traits` - trait information on each dog breed and scores for each trait (wide format)
+- `trait_description` - long descriptions of each trait and values corresponding to `Trait_Score`
+- `breed_rank_all` - popularity of dog breeds by AKC registration statistics from 2013-2020
 
 
 ## Data Dictionary
@@ -53,18 +53,27 @@ Data in this repository comes from the [American Kennel Club](https://www.akc.or
 |Trait_5            |character    | Value corresponding to `Trait` when `Trait_Score` = 5 |
 |Description            |character | Long description of trait |
 
-### `breed_rank_2020.csv`
+### `breed_rank_all.csv`
 
 |variable        |class     |description |
 |:---------------|:---------|:-----------|
 |Breed    |character | Dog Breed |
-|2020 Rank            |character | Popularity of breed based on AKC registration statistics in 2020 |
+|2013 Rank            |character | Popularity of breed based on AKC registration statistics in 2013 |
+|2014 Rank            |character | Popularity of breed based on AKC registration statistics in 2014 |
+|2015 Rank            |character | Popularity of breed based on AKC registration statistics in 2015 |
+|2016 Rank            |character | Popularity of breed based on AKC registration statistics in 2016 |
+|2017 Rank            |character | Popularity of breed based on AKC registration statistics in 2017 |
+|2018 Rank            |character | Popularity of breed based on AKC registration statistics in 2018 |
+|2019 Rank            |character | Popularity of breed based on AKC registration statistics in 2020 |
+|2020 Rank            |character | Popularity of breed based on AKC registration statistics in 2019 |
 |links            |character    | Link to the dog breed's AKC webpage |
 |Image            |character    | Link to image of dog breed |
 
 ********************************************************
 
-Script to retrieve the data: [webscraping_script.Rmd](https://github.com/kkakey/dog_traits_AKC/blob/main/webscraping_script.Rmd)
+Scripts to retrieve the data: 
+- [webscraping_script-1.Rmd](https://github.com/kkakey/dog_traits_AKC/blob/main/webscraping_script-1.Rmd)
+- [webscraping_script-2.Rmd](https://github.com/kkakey/dog_traits_AKC/blob/main/webscraping_script-2.Rmd)
 
 Last retrieved on Dec. 23, 2021
 
