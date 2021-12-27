@@ -2,7 +2,7 @@
 
 Data in this repository comes from the [American Kennel Club](https://www.akc.org/).
 
-<img src="https://media-cldnry.s-nbcnews.com/image/upload/newscms/2020_28/1587661/dogs-age-years-kb-inline-200707.jpg" width="300" >
+<img src="https://media-cldnry.s-nbcnews.com/image/upload/newscms/2020_28/1587661/dogs-age-years-kb-inline-200707.jpg" alt="image of five puppies sitting and looking at camera with a white background" width="300" >
 
 ## The Datasets
 
@@ -64,6 +64,7 @@ Data in this repository comes from the [American Kennel Club](https://www.akc.or
 
 ********************************************************
 
-Script to retrive the data: [webscraping_script.Rmd](https://github.com/kkakey/dog_traits_AKC/blob/main/webscraping_script.Rmd)
+Script to retrieve the data: [webscraping_script.Rmd](https://github.com/kkakey/dog_traits_AKC/blob/main/webscraping_script.Rmd)
 
+Last retrieved on Dec. 23, 2021
 
