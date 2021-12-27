@@ -1,0 +1,57 @@
+---
+title: "webscraping_dog_breed_popularity"
+author: "Kristen A, kkakey"
+date: "12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Script to retrieve popularity rankings from previous years (2013 - 2019)
+
+```{r}
+full_df <- data.frame(matrix(ncol = 2, nrow = 0))
+for (year in seq(2013,2019)) {
+  page <- paste0("https://www.akc.org/most-popular-breeds/",year,"-full-list/")
+
+  breed_rank_past <- read_html(page) %>%
+    html_nodes("div.page-layout") %>%
+    html_nodes("div.article-body") %>%
+    html_table(fill = TRUE) %>%
+    as.data.frame() %>%
+    janitor::row_to_names(row_number=1) %>%
+    rename(!!paste0(year," Rank") := Rank)
+  
+  if (year!=2013) {
+    full_df <- full_df %>%
+      left_join(.,breed_rank_past, on="Breed")
+  } else {
+    full_df <- rbind(full_df, breed_rank_past)
+  }
+
+}
+```
+
+
+Append to most recent (2020) dataset retrieved with webscraping_script-1.Rmd
+
+```{r}
+breed_rank <- read.csv("./data/breed_rank.csv") %>%
+  rename(`2020 Rank`=X2020.Rank)
+```
+
+```{r}
+breed_rank <- breed_rank %>%
+  # fix UTF-8 encoding
+  mutate_at(vars(Breed), function(x){gsub('[^ -~]', ' ', x)}) %>%
+  left_join(., full_df, on="Breed")
+
+# re-order columns
+breed_rank <- breed_rank[, c(1, c(5:ncol(breed_rank)), 2:4)]
+
+write.csv(breed_rank, "./data/breed_rank_all.csv", row.names = F)
+saveRDS(breed_rank, "./data/breed_rank_all.rds")
+```
+
