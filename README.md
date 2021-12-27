@@ -59,7 +59,8 @@ Data in this repository comes from the [American Kennel Club](https://www.akc.or
 |:---------------|:---------|:-----------|
 |Breed    |character | Dog Breed |
 |2020 Rank            |character | Popularity of breed based on AKC registration statistics in 2020 |
-|links            |character    | Link to the dog breed's AKC webpage
+|links            |character    | Link to the dog breed's AKC webpage |
+|Image            |character    | Link to image of dog breed |
 
 ********************************************************
 
