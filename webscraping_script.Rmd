@@ -24,11 +24,11 @@ Get rankings of most popular dog breeds in [2020](https://www.akc.org/expert-adv
 ```{r}
 page <- read_html('https://www.akc.org/expert-advice/dog-breeds/the-most-popular-dog-breeds-of-2020/')
 
-breed_rank_2020 <- page %>%
+breed_rank <- page %>%
   html_nodes(xpath='//*[@id="main-content"]/div[1]/div[2]/div/div[1]/table') %>%
   html_table(fill = TRUE) 
 
-breed_rank_2020 <- breed_rank_2020 %>%
+breed_rank <- breed_rank %>%
   as.data.frame() %>%
   janitor::row_to_names(row_number=1)
 ```
@@ -40,8 +40,8 @@ links <- page %>%
   html_nodes("tr") %>%
   html_nodes("a") %>% html_attr("href")
 
-breed_rank_2020 <- cbind(breed_rank_2020, links)
-write.csv(breed_rank_2020, "./data/breed_rank_2020.csv", row.names=F)
+breed_rank <- cbind(breed_rank, links)
+write.csv(breed_rank, "./data/breed_rank.csv", row.names=F)
 ```
 
 
@@ -54,7 +54,7 @@ fprof <- getFirefoxProfile(Sys.getenv("firefox_prof_path"), useBase=TRUE)
 
 for (num in seq_along(links)) {
   
-  print(paste(num, breed_rank_2020[num,]$Breed))
+  print(paste(num, breed_rank[num,]$Breed))
   
   url <- links[num]
   if (num==1) {
@@ -121,7 +121,7 @@ for (num in seq_along(links)) {
       
     }
     c <- c + 1
-    breed_table <- rbind(breed_table, c(breed_rank_2020[num,]$Breed, trait, 
+    breed_table <- rbind(breed_table, c(breed_rank[num,]$Breed, trait, 
                                         trait_range1, trait_range2, trait_score))
   }
   colnames(breed_traits)  <- c("Breed", "Trait", "Trait_1", "Trait_5", "Trait_Score")
@@ -153,7 +153,7 @@ for (num in seq_along(links)) {
     
   weight <- text[grepl("pounds", text, fixed = TRUE)]
 
-  breed_img_table <- rbind(breed_img_table, c(breed_rank_2020[num,]$Breed , 
+  breed_img_table <- rbind(breed_img_table, c(breed_rank[num,]$Breed , 
                                               image_link, paste(weight,collapse = '; ')))
   colnames(breed_img_full)  <- c("Breed", "Image", "Weight")
   colnames(breed_img_table)  <- c("Breed", "Image", "Weight")
@@ -179,7 +179,7 @@ Clean and export data
 ```{r}
 # join webscraped data
 joined_data <- breed_traits %>%
-  left_join(., breed_rank_2020, on ="Breed") %>%
+  left_join(., breed_rank, on ="Breed") %>%
   left_join(., breed_img_full, on ="Breed")
 
 breed_traits_long <- joined_data %>%
@@ -220,12 +220,12 @@ saveRDS(trait_description, "./data/trait_description.rds")
 ```
 
 ```{r}
-breed_rank_2020 <- breed_rank_2020 %>%
+breed_rank <- breed_rank %>%
   # join Image links
   left_join(., joined_data %>% select(Breed, Image), on="Breed") %>%
   distinct()
 
-write.csv(breed_rank_2020, "./data/breed_rank_2020.csv", row.names=F)
-saveRDS(breed_rank_2020, "./data/breed_rank_2020.rds")
+write.csv(breed_rank, "./data/breed_rank.csv", row.names=F)
+saveRDS(breed_rank, "./data/breed_rank.rds")
 ```
 
