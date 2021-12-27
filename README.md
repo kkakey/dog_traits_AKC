@@ -2,7 +2,7 @@
 
 Data in this repository comes from the [American Kennel Club](https://www.akc.org/).
 
-<img src="https://media-cldnry.s-nbcnews.com/image/upload/newscms/2020_28/1587661/dogs-age-years-kb-inline-200707.jpg" width="300" >
+<img src="https://media-cldnry.s-nbcnews.com/image/upload/newscms/2020_28/1587661/dogs-age-years-kb-inline-200707.jpg" alt="image of five puppies sitting and looking at camera with a white background" width="300" >
 
 ## The Datasets
 
