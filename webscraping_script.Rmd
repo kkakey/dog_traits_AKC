@@ -168,7 +168,7 @@ for (num in seq_along(links)) {
 rD$server$stop()
 
 ### save data
-# write.csv(breed_traits, "./data/breed_traits.csv", row.names=F)
+# write.csv(breed_traits, "./data/breed_traits_raw.csv", row.names=F)
 # write.csv(breed_img_full, "./data/breed_weight_image.csv", row.names=F)
 ```
 
@@ -195,10 +195,7 @@ breed_traits_wide <- pivot_wider(joined_data,
             id_cols = c(`2020 Rank`, Breed),
             names_from = Trait, 
             values_from = Trait_Score) %>%
-  # join Image links
-  left_join(., joined_data %>% select(Breed, Image), on="Breed") %>% 
-  select(!`2020 Rank`) %>%
-  distinct()
+  select(!`2020 Rank`) 
 
 write.csv(breed_traits_wide, "./data/breed_traits.csv", row.names=F)
 saveRDS(breed_traits_wide, "./data/breed_traits.rds")
@@ -223,6 +220,11 @@ saveRDS(trait_description, "./data/trait_description.rds")
 ```
 
 ```{r}
+breed_rank_2020 <- breed_rank_2020 %>%
+  # join Image links
+  left_join(., joined_data %>% select(Breed, Image), on="Breed") %>%
+  distinct()
+
 write.csv(breed_rank_2020, "./data/breed_rank_2020.csv", row.names=F)
 saveRDS(breed_rank_2020, "./data/breed_rank_2020.rds")
 ```
