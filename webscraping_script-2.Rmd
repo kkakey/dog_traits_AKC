@@ -35,11 +35,13 @@ for (year in seq(2013,2020)) {
     janitor::row_to_names(row_number=1) %>%
     # fix UTF-8 encoding, affects 2020
     mutate_at(vars(Breed), function(x){gsub('[^ -~]', ' ', x)}) %>%
-    rename_at(vars(starts_with("Rank")), funs(paste0(year, ' ', .)))
-  
+    rename_at(vars(starts_with("Rank")), funs(paste0(year, ' ', .))) %>%
+    # standardize Breed names that changed overtime
+    mutate(Breed=replace(Breed, Breed=="Plotts", "Plott Hounds"))
+
   if (year!=2013) {
     full_df <- full_df %>%
-      left_join(.,breed_rank_past, on="Breed")
+      full_join(.,breed_rank_past, on="Breed")
   } else {
     full_df <- rbind(full_df, breed_rank_past)
   }
