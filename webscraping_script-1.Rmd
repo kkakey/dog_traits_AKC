@@ -225,7 +225,7 @@ breed_rank <- breed_rank %>%
   left_join(., joined_data %>% select(Breed, Image), on="Breed") %>%
   distinct()
 
-write.csv(breed_rank, "./data/breed_rank.csv", row.names=F)
-saveRDS(breed_rank, "./data/breed_rank.rds")
+write.csv(breed_rank, "./data/table_rank_2020.csv", row.names=F)
+saveRDS(breed_rank, "./data/table_rank_2020.rds")
 ```
 
